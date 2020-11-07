@@ -18,12 +18,12 @@ public class Source {
     }
 
     public Pair<Double, Request> generate(final double currentTime) {
-        final double nextRequestTime = getNextRequestTime(currentTime);
+        final double nextRequestTime = getNextRequestTime();
         return new Pair<>(nextRequestTime, new Request(number, nextRequestNumber++, currentTime));
     }
 
-    private double getNextRequestTime(final double currentTime) {
-        return currentTime + generator.nextDouble()  * (beta - alpha) + alpha;
+    private double getNextRequestTime() {
+        return generator.nextDouble()  * (beta - alpha) + alpha;
     }
 
 //    public static void main(String[] args) {

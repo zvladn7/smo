@@ -17,16 +17,16 @@ public class Buffer {
         requests = new LinkedList<>();
     }
 
-    public Request put(final Request request) {
+    public Pair<Integer, Request> put(final Request request) {
         if (isFull()) {
             return getLessPriority(request);
         }
         requests.add(request);
-        return null;
+        return new Pair<>(requests.indexOf(request), null);
     }
 
-    public Request getPriorityRequest() {
-        return requests.poll();
+    public Pair<Integer, Request> getPriorityRequest() {
+        return new Pair<>(0, requests.poll());
     }
 
     /**
@@ -34,19 +34,20 @@ public class Buffer {
      * @param packageNumber - number of the package that will be processed on devices
      * @return request from the package or null
      */
-    public Request getPackageRequest(final int packageNumber) {
+    public Pair<Integer, Request> getPackageRequest(final int packageNumber) {
         for (final Request request : requests) {
             if (request.getSourceNumber() == packageNumber) {
                 logger.info("Следующий запрос из пакета №{} : {}", request.getSourceNumber(), request.getNumber());
+                final int index = requests.indexOf(request);
                 requests.remove(request);
-                return request;
+                return new Pair<>(index, request);
             }
         }
 
         return null;
     }
 
-    private Request getLessPriority(final Request newRequest) {
+    private Pair<Integer, Request> getLessPriority(final Request newRequest) {
         Request lessPriority = newRequest;
         for (final Request next : requests) {
             final int compareResult = Request.REQUEST_COMPARATOR.compare(next, lessPriority);
@@ -57,11 +58,13 @@ public class Buffer {
         logger.info("Return less priority value: src={}, num={}, initTime={}",
                 lessPriority.getSourceNumber(), lessPriority.getNumber(), lessPriority.getInitialTime());
         if (lessPriority == newRequest) {
-            return newRequest;
+            return new Pair<>(-1, newRequest);
         } else {
+            final int i = requests.indexOf(lessPriority);
+            requests.set(i, newRequest);
             requests.remove(lessPriority);
-            requests.add(newRequest);
-            return lessPriority;
+//            requests.add(newRequest);
+            return new Pair<>(i, lessPriority);
         }
     }
 
@@ -78,15 +81,21 @@ public class Buffer {
         buffer.put(new Request(1,1,1));
         buffer.put(new Request(1, 2, 2));
         buffer.put(new Request(2, 1, 1));
-        buffer.put(new Request(2, 2, 1));
-        buffer.put(new Request(2, 3, 1));
+        buffer.put(new Request(2, 2, 2));
+        buffer.put(new Request(2, 3, 3));
 //        buffer.put(new Request(1, 3, 3));
 //        buffer.put(new Request(1, 4, 4));
 //        buffer.put(new Request(1, 5, 5));
         System.out.println(buffer.isFull());
-        buffer.getPackageRequest(2);
-        buffer.getPackageRequest(2);
-        buffer.getPackageRequest(2);
+//        System.out.println(buffer.getPackageRequest(2));
+//        System.out.println(buffer.getPackageRequest(2));
+//        System.out.println(buffer.getPackageRequest(2));
+        System.out.println(buffer.getLessPriority(new Request(3, 1, 1)).key);
+        System.out.println(buffer.getLessPriority(new Request(3, 2, 1)).key);
+        System.out.println(buffer.getLessPriority(new Request(3, 3, 1)).key);
+        System.out.println(buffer.getLessPriority(new Request(1, 3, 1)).key);
+        System.out.println(buffer.getLessPriority(new Request(1, 3, 1)).key);
+        System.out.println(buffer.getLessPriority(new Request(1, 3, 1)).key);
     }
 
 }

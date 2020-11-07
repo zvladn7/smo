@@ -69,23 +69,20 @@ public class SelectionManager {
                 return deviceIndex;
             }
             ++deviceIndex;
-        } while (deviceIndex == circleIndex);
+        } while (deviceIndex != circleIndex);
 
         throw new IllegalStateException("There is no free devices on invocation");
     }
 
     public List<DoneInfo> getDoneRequestsWithDevices(final double currentTime) {
         final List<DoneInfo> doneList = new ArrayList<>();
-//        for (int deviceIndex = 0; deviceIndex < devices.length; ++deviceIndex) {
-//            if (devices[deviceIndex].getDoneTime() < currentTime) {
-//                doneList.add(new Pair<>(deviceIndex, devices[deviceIndex].getDoneRequest()));
-//                devices[deviceIndex].clearAfterDoneProcessing();
-//            }
-//        }
         Arrays.stream(devices)
                 .filter(device -> device.getDoneTime() < currentTime)
                 .forEach(device -> {
-                    doneList.add(new DoneInfo(device.getNumber(), device.getDoneRequest(), device.getDoneTime()));
+                    final double startTime = device.getStartTime();
+                    final double doneTime = device.getDoneTime();
+                    final double timeOnDevice = doneTime - startTime;
+                    doneList.add(new DoneInfo(device.getNumber(), device.getDoneRequest(), doneTime, timeOnDevice));
                     device.clearAfterDoneProcessing();
                 });
         return doneList;
@@ -95,11 +92,16 @@ public class SelectionManager {
         public int deviceNumber;
         public Request doneRequest;
         public double doneTime;
+        public double timeOnDevice;
 
-        public DoneInfo(int deviceNumber, Request doneRequest, double doneTime) {
+        public DoneInfo(final int deviceNumber,
+                        final Request doneRequest,
+                        final double doneTime,
+                        final double timeOnDevice) {
             this.deviceNumber = deviceNumber;
             this.doneRequest = doneRequest;
             this.doneTime = doneTime;
+            this.timeOnDevice = timeOnDevice;
         }
     }
 

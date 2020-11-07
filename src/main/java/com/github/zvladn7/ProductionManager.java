@@ -1,5 +1,9 @@
 package com.github.zvladn7;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 public class ProductionManager {
 
     private final Source[] sources;
@@ -21,12 +25,25 @@ public class ProductionManager {
         }
     }
 
-    public Pair<Double, Request> getNextRequest(final double currentTime) {
+    public Pair<Double, List<Request>> getNextRequest(final double currentTime) {
         generateRequestsIfNeed(currentTime);
         final int minTimeIndex = getMinTimeIndex();
         final double minWaitTime = timesToWait[minTimeIndex];
         declineWaitTime(minTimeIndex);
-        return new Pair<>(minWaitTime, sourcesRequests[minTimeIndex]);
+        final List<Request> generatedRequests = getGeneratedRequests(currentTime);
+        return new Pair<>(minWaitTime, generatedRequests);
+    }
+
+    private List<Request> getGeneratedRequests(final double currentTime) {
+        final List<Request> ready = new ArrayList<>();
+        for (int i = 0; i < sourcesRequests.length; i++) {
+            if (sourcesRequests[i] != null && sourcesRequests[i].getInitialTime() <= currentTime) {
+                ready.add(sourcesRequests[i]);
+                sourcesRequests[i] = null;
+            }
+        }
+        ready.sort(Comparator.comparing(Request::getSourceNumber));
+        return ready;
     }
 
     private void declineWaitTime(final int minTimeIndex) {

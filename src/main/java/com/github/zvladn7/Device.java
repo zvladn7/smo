@@ -11,8 +11,10 @@ public class Device {
 
     private Request requestOnDevice;
     private double timeToDone;
-    public Device(int number) {
+    private double startTime;
+    public Device(final int number) {
         this.number = number;
+        this.startTime = -1;
         this.timeToDone = -1;
         this.requestOnDevice = null;
     }
@@ -28,18 +30,23 @@ public class Device {
     public void execute(final Request request, final double currentTime) {
         final double timeToDo = getTimeOnDevice();
         this.requestOnDevice = request;
+        this.startTime = currentTime;
         this.timeToDone = currentTime + timeToDo;
         System.out.println("Execute " + counter++);
     }
 
     public void clearAfterDoneProcessing() {
         this.requestOnDevice = null;
+        this.startTime = -1;
         this.timeToDone = -1;
     }
 
-
     public Request getDoneRequest() {
         return requestOnDevice;
+    }
+
+    public double getStartTime() {
+        return startTime;
     }
 
     public double getDoneTime() {

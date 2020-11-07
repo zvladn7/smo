@@ -76,57 +76,70 @@ public class Controller {
         double currentTime = 0;
 
         for (int i = 0; i < requestsNumber; ++i) {
-            final Pair<Double, Request> nextRequestPair = productionManager.getNextRequest(currentTime);
-            final Request nextRequest = nextRequestPair.value;
+            final Pair<Double, List<Request>> nextRequestPair = productionManager.getNextRequest(currentTime);
+            final List<Request> nextRequests = nextRequestPair.value;
             currentTime += nextRequestPair.key;
 
             List<DoneInfo> doneRequestsWithDevices = selectionManager.getDoneRequestsWithDevices(currentTime);
-            processDoneRequest(doneRequestsWithDevices, selectionManager, buffer, currentTime);
+            processDoneRequest(doneRequestsWithDevices, selectionManager, buffer, currentTime, analytics);
 
-            logger.info("Источник №{} создал заявку №{} в {}",
-                    nextRequest.getSourceNumber(), nextRequest.getNumber(), nextRequest.getInitialTime());
+            for (final Request nextRequest : nextRequests){
+                logger.info("Источник №{} создал заявку №{} в {}",
+                        nextRequest.getSourceNumber(), nextRequest.getNumber(), nextRequest.getInitialTime());
+                logger.info("CurrentTime: {}", currentTime);
+                analytics.addGeneratedRequest(nextRequest);
 
-            final Request canceledRequest = buffer.put(nextRequest);
-            if (canceledRequest != null) {
-                logger.info("Заявка №{} от источника №{} была отменена",
-                        canceledRequest.getNumber(), canceledRequest.getSourceNumber());
-            } else {
-                logger.info("Заявка успешно загружена в буфер без удалений!");
+                final Pair<Integer, Request> canceledRequestPair = buffer.put(nextRequest);
+                final Request canceledRequest = canceledRequestPair.value;
+                if (canceledRequest != null) {
+                    logger.info("Заявка №{} от источника №{} была отменена",
+                            canceledRequest.getNumber(), canceledRequest.getSourceNumber());
+                    analytics.cancelRequest(canceledRequest, nextRequest.getInitialTime());
+                } else {
+                    logger.info("Заявка успешно загружена в буфер без удалений!");
+                    analytics.addRequestToBuffer(nextRequest, canceledRequestPair.key);
+                }
             }
         }
+
+        analytics.calcTimeInSystem();
+        analytics.printStat();
     }
 
     private void processDoneRequest(final List<DoneInfo> doneRequestsWithDevices,
                                     final SelectionManager selectionManager,
                                     final Buffer buffer,
-                                    final double currentTime) {
+                                    final double currentTime,
+                                    final Analytics analytics) {
         for (final DoneInfo doneInfo : doneRequestsWithDevices) {
             final Request doneRequest = doneInfo.doneRequest;
             if (doneRequest != null) {
                 logger.info("Прибор №{} освободился в {}, выполнив {} запрос источника №{}",
                         doneInfo.deviceNumber, doneInfo.doneTime, doneRequest.getNumber(), doneRequest.getSourceNumber());
+                analytics.addDoneRequest(doneInfo.deviceNumber, doneRequest, doneInfo.doneTime, doneInfo.doneTime);
             }
             if (!buffer.isEmpty()) {
                 final int packageNumber = selectionManager.getPackageNumber();
-                Request requestFromBuf;
+                Pair<Integer, Request> requestFromBufPair;
                 if (packageNumber != -1) {
-                    requestFromBuf = buffer.getPackageRequest(packageNumber);
-                    if (requestFromBuf == null) {
-                        requestFromBuf = buffer.getPriorityRequest();
-                        selectionManager.setPackageNumber(requestFromBuf.getSourceNumber());
+                    requestFromBufPair = buffer.getPackageRequest(packageNumber);
+                    if (requestFromBufPair == null) {
+                        requestFromBufPair = buffer.getPriorityRequest();
+                        selectionManager.setPackageNumber(requestFromBufPair.value.getSourceNumber());
                     }
                 } else {
-                    requestFromBuf = buffer.getPriorityRequest();
-                    selectionManager.setPackageNumber(requestFromBuf.getSourceNumber());
+                    requestFromBufPair = buffer.getPriorityRequest();
+                    selectionManager.setPackageNumber(requestFromBufPair.value.getSourceNumber());
                 }
+                final Request requestFromBuf = requestFromBufPair.value;
+                analytics.removeFromBuffer(requestFromBuf, requestFromBufPair.key, doneInfo.doneTime);
 
                 final int deviceNumber = selectionManager.executeRequest(requestFromBuf, currentTime);
                 logger.info("Заявка №{} от источника №{} загружена на прибор №{}",
                         requestFromBuf.getNumber(), requestFromBuf.getSourceNumber(), deviceNumber);
+                analytics.putOnDevice(deviceNumber, doneInfo.doneTime);
             }
         }
     }
-
-
 
 }
