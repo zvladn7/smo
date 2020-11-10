@@ -12,6 +12,6 @@ public class Main {
                 .setRequestsNumber(1000)
                 .build();
 
-        controller.modulateWork(new Analytics(4));
+        controller.modulateWork();
     }
 }

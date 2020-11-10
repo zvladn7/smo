@@ -1,8 +1,12 @@
-package com.github.zvladn7;
+package com.github.zvladn7.analytics;
 
+import com.github.zvladn7.Pair;
+import com.github.zvladn7.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 public class Analytics {
@@ -12,7 +16,7 @@ public class Analytics {
     //1 - количество сгенирированных заявок каждым источником
     //2 - вероятность отказа в обслуживании заявок каждого источка
     //а - обслуженные, б - нет;
-    // вероянтность=а/(а+б)
+    // вероянтность=б/(а+б)
     /*
     3 - среднее время пребывания заявок каждого источника в системе
     4 - среднее время ожидания заявок каждого источника
@@ -32,6 +36,7 @@ public class Analytics {
      * Value: Pair of event type and number of (sources, buf position or device) depend on type
      */
     private TreeMap<Double, Pair<EventType, Integer>> analytics;
+    private double fullTimeOfWork;
 
     /**
      * Types of special events in the system.
@@ -45,25 +50,31 @@ public class Analytics {
         FREE_DEVICE
     }
 
+    //for sources
     private int[] amountOfGeneratedRequests;
     private int[] amountOfFailed;
     private int[] amountOfProcessed;
     private double[] timeInSystem;
     private double[] timeOfWait;
-    private double[] timeOfDeviceWork;
+    private double[] timeOnDevice;
 
-    public Analytics(final int sourcesAmount) {
+    //for devices
+    private double[] deviceWorkTime;
+
+    public Analytics(final int sourcesAmount, final int devicesAmount) {
         analytics = new TreeMap<>();
-        statArraysInit(sourcesAmount);
+        statArraysInit(sourcesAmount, devicesAmount);
     }
 
-    private void statArraysInit(final int sourcesAmount) {
+    private void statArraysInit(final int sourcesAmount, int devicesAmount) {
         amountOfGeneratedRequests = new int[sourcesAmount];
         amountOfFailed = new int[sourcesAmount];
         amountOfProcessed = new int[sourcesAmount];
         timeInSystem = new double[sourcesAmount];
         timeOfWait = new double[sourcesAmount];
-        timeOfDeviceWork = new double[sourcesAmount];
+        timeOnDevice = new double[sourcesAmount];
+
+        deviceWorkTime = new double[devicesAmount];
     }
 
     public void addGeneratedRequest(final Request request) {
@@ -102,17 +113,82 @@ public class Analytics {
     public void addDoneRequest(final int deviceNumber,
                                final Request request,
                                final double timeOnDevice,
-                               final double time) {
+                               final double timeOfWork) {
         final int sourceNumber = request.getSourceNumber();
-        timeOfDeviceWork[sourceNumber] += timeOnDevice;
-        amountOfProcessed[sourceNumber]++;
-        analytics.put(time, new Pair<>(EventType.FREE_DEVICE, deviceNumber));
+        this.timeOnDevice[sourceNumber] += timeOnDevice;
+        this.deviceWorkTime[deviceNumber] += timeOfWork;
+        this.amountOfProcessed[sourceNumber]++;
+        this.analytics.put(timeOnDevice, new Pair<>(EventType.FREE_DEVICE, deviceNumber));
     }
 
     public void calcTimeInSystem() {
         for (int i = 0; i < timeInSystem.length; i++) {
-            timeInSystem[i] = timeOfWait[i] + timeOfDeviceWork[i];
+            timeInSystem[i] = timeOfWait[i] + timeOnDevice[i];
         }
+    }
+
+    public List<SourceResults> getSourceResultsList() {
+        final List<SourceResults> resultsList = new ArrayList<>();
+        for (int i = 0; i < amountOfGeneratedRequests.length; ++i) {
+            resultsList.add(new SourceResults(
+                    i,
+                    amountOfGeneratedRequests[i],
+                    amountOfProcessed[i],
+                    amountOfFailed[i],
+                    getCancelProbability(i),
+                    getAvgTimeInSystem(i),
+                    getAvgTimeOfWait(i),
+                    getAvgTimeOnDevice(i),
+                    getDispOfWait(i),
+                    getDispOfProcess(i)
+            ));
+        }
+        return resultsList;
+    }
+
+    public List<DeviceResults> getDeviceResultsList() {
+        final List<DeviceResults> deviceResults = new ArrayList<>();
+        for (int i = 0; i < deviceWorkTime.length; ++i) {
+            deviceResults.add(new DeviceResults(
+                    i,
+                    deviceWorkTime[i],
+                    fullTimeOfWork,
+                    getCoefOfRealization(i)
+            ));
+        }
+        return deviceResults;
+    }
+
+    private double getCoefOfRealization(final int deviceNumber) {
+        return deviceWorkTime[deviceNumber] / fullTimeOfWork;
+    }
+
+    public void setFullTimeOfWork(double fullTimeOfWork) {
+        this.fullTimeOfWork = fullTimeOfWork;
+    }
+
+    private double getAvgTimeInSystem(final int sourceNumber) {
+        return timeInSystem[sourceNumber] / amountOfGeneratedRequests[sourceNumber];
+    }
+
+    private double getAvgTimeOfWait(final int sourceNumber) {
+        return timeOfWait[sourceNumber] / amountOfGeneratedRequests[sourceNumber];
+    }
+
+    private double getAvgTimeOnDevice(final int sourceNumber) {
+        return timeOnDevice[sourceNumber] / amountOfGeneratedRequests[sourceNumber];
+    }
+
+    private double getCancelProbability(final int sourceNumber) {
+        return amountOfFailed[sourceNumber] / (amountOfProcessed[sourceNumber] + amountOfFailed[sourceNumber]);
+    }
+
+    private double getDispOfWait(final int sourceNumber) {
+        return timeOfWait[sourceNumber] / timeInSystem[sourceNumber];
+    }
+
+    private double getDispOfProcess(final int sourceNumber) {
+        return timeOnDevice[sourceNumber] / timeInSystem[sourceNumber];
     }
 
     public void printStat() {
@@ -126,7 +202,7 @@ public class Analytics {
         System.out.println("Time of wait: ");
         printArray(timeOfWait);
         System.out.println("Time of device work: ");
-        printArray(timeOfDeviceWork);
+        printArray(timeOnDevice);
         System.out.println("Time in system: ");
         printArray(timeInSystem);
     }

@@ -35,7 +35,7 @@ public class MainWindowController {
     void initialize() {
         setOnActionForButton(autoModeBtn, getPathByFileName("AutoModeWindow.fxml"));
         setOnActionForButton(stepModeBtn, getPathByFileName("StepModeWindow.fxml"));
-        setOnActionForButton(setSettingsBtn, getPathByFileName("SetSettingsWindow.fxml"));
+        setOnActionForButton(setSettingsBtn, getPathByFileName("SetSettingWindow.fxml"));
     }
 
     private static String getPathByFileName(final String fileName) {

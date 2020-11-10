@@ -6,7 +6,8 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.zvladn7.graphics.controllers.AutoModeWindowController">
    <children>
       <AnchorPane prefHeight="150.0" prefWidth="1200.0" style="-fx-background-color: #2E3348;">
          <children>
@@ -24,16 +25,56 @@
       </AnchorPane>
       <TableView fx:id="sourceTable" layoutX="7.0" layoutY="189.0" prefHeight="374.0" prefWidth="1186.0">
          <columns>
-            <TableColumn fx:id="sourceNumber" prefWidth="148.0" text="Номер источкника" />
-            <TableColumn fx:id="genNumber" prefWidth="133.0" text="Сгенерировано" />
-            <TableColumn fx:id="processedNumber" prefWidth="106.0" text="Обработано" />
-            <TableColumn fx:id="canceledNumber" prefWidth="89.0" text="Отказ" />
-            <TableColumn fx:id="probCancel" prefWidth="92.0" text="P(отказ)" />
-            <TableColumn fx:id="timeInSystem" prefWidth="102.0" text="Т(система)" />
-            <TableColumn fx:id="timeOfWait" prefWidth="101.0" text="Т(ожид.)" />
-            <TableColumn fx:id="timeOnDevice" prefWidth="91.0" text="Т(обслуж.)" />
-            <TableColumn fx:id="dispWait" prefWidth="154.0" text="Дисперсия(ожид.)" />
-            <TableColumn fx:id="dispProc" prefWidth="167.0" text="Дисперсия(выполн.)" />
+            <TableColumn prefWidth="148.0" text="Номер источкника">
+               <cellValueFactory>
+                  <PropertyValueFactory property="sourceNumber"/>
+               </cellValueFactory>
+            </TableColumn>
+            <TableColumn prefWidth="133.0" text="Сгенерировано">
+               <cellValueFactory>
+                  <PropertyValueFactory property="genNumber"/>
+               </cellValueFactory>
+            </TableColumn>
+            <TableColumn prefWidth="106.0" text="Обработано">
+               <cellValueFactory>
+                  <PropertyValueFactory property="processedNumber"/>
+               </cellValueFactory>
+            </TableColumn>
+            <TableColumn prefWidth="89.0" text="Отказ">
+               <cellValueFactory>
+                  <PropertyValueFactory property="canceledNumber"/>
+               </cellValueFactory>
+            </TableColumn>
+            <TableColumn prefWidth="92.0" text="P(отказ)">
+               <cellValueFactory>
+                  <PropertyValueFactory property="probCancel"/>
+               </cellValueFactory>
+            </TableColumn>
+            <TableColumn prefWidth="102.0" text="Т(система)">
+               <cellValueFactory>
+                  <PropertyValueFactory property="timeInSystem"/>
+               </cellValueFactory>
+            </TableColumn>
+            <TableColumn prefWidth="101.0" text="Т(ожид.)">
+               <cellValueFactory>
+                  <PropertyValueFactory property="timeOfWait"/>
+               </cellValueFactory>
+            </TableColumn>
+            <TableColumn prefWidth="91.0" text="Т(обслуж.)">
+               <cellValueFactory>
+                  <PropertyValueFactory property="timeOnDevice"/>
+               </cellValueFactory>
+            </TableColumn>
+            <TableColumn prefWidth="154.0" text="Дисперсия(ожид.)">
+               <cellValueFactory>
+                  <PropertyValueFactory property="dispWait"/>
+               </cellValueFactory>
+            </TableColumn>
+            <TableColumn prefWidth="167.0" text="Дисперсия(выполн.)">
+               <cellValueFactory>
+                  <PropertyValueFactory property="dispProc"/>
+               </cellValueFactory>
+            </TableColumn>
          </columns>
       </TableView>
       <Text fill="#000000d7" layoutY="184.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-text-alignment: center;" text="Источники" textAlignment="CENTER" underline="true" wrappingWidth="118.7294921875">
@@ -48,10 +89,26 @@
       </Text>
       <TableView fx:id="deviceTable" layoutX="14.0" layoutY="592.0" prefHeight="267.0" prefWidth="1117.0">
          <columns>
-            <TableColumn fx:id="sourceNumber1" prefWidth="148.0" text="Номер прибора" />
-            <TableColumn fx:id="genNumber1" prefWidth="133.0" text="Время работы" />
-            <TableColumn fx:id="genNumber11" prefWidth="157.0" text="Время реализации" />
-            <TableColumn fx:id="genNumber111" prefWidth="194.0" text="Коэфф. использования" />
+            <TableColumn prefWidth="148.0" text="Номер прибора">
+               <cellValueFactory>
+                  <PropertyValueFactory property="deviceNumber"/>
+               </cellValueFactory>
+            </TableColumn>
+            <TableColumn prefWidth="133.0" text="Время работы">
+               <cellValueFactory>
+                  <PropertyValueFactory property="timeOfWork"/>
+               </cellValueFactory>
+            </TableColumn>
+            <TableColumn prefWidth="157.0" text="Время реализации">
+               <cellValueFactory>
+                  <PropertyValueFactory property="timeOfRealization"/>
+               </cellValueFactory>
+            </TableColumn>
+            <TableColumn prefWidth="194.0" text="Коэфф. использования">
+               <cellValueFactory>
+                  <PropertyValueFactory property="coefOfRealization"/>
+               </cellValueFactory>
+            </TableColumn>
          </columns>
       </TableView>
    </children>

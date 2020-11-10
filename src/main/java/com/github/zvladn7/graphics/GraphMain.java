@@ -14,10 +14,8 @@ import java.io.IOException;
 public class GraphMain extends Application {
 
     private static final Logger logger = LoggerFactory.getLogger(GraphMain.class);
-    private static String MAIN_WINDOW_FILE_PATH
-            = "src/main/java/com/github/zvladn7/graphics/fxmlfiles/MainWindow.fxml";
     public static String FXML_FILE_PARENT_PATH = "src/main/java/com/github/zvladn7/graphics/fxmlfiles/";
-//    public static String MAIN_WINDOW_FILE_PATH = FXML_FILE_PARENT_PATH + "MainWindow.fxml";
+    public static String MAIN_WINDOW_FILE_PATH = FXML_FILE_PARENT_PATH + "MainWindow.fxml";
 
 
 

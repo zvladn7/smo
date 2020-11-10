@@ -92,16 +92,16 @@ public class SelectionManager {
         public int deviceNumber;
         public Request doneRequest;
         public double doneTime;
-        public double timeOnDevice;
+        public double timeOfWork;
 
         public DoneInfo(final int deviceNumber,
                         final Request doneRequest,
                         final double doneTime,
-                        final double timeOnDevice) {
+                        final double timeOfWork) {
             this.deviceNumber = deviceNumber;
             this.doneRequest = doneRequest;
             this.doneTime = doneTime;
-            this.timeOnDevice = timeOnDevice;
+            this.timeOfWork = timeOfWork;
         }
     }
 

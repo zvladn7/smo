@@ -1,6 +1,7 @@
 package com.github.zvladn7;
 
 import com.github.zvladn7.SelectionManager.DoneInfo;
+import com.github.zvladn7.analytics.Analytics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ public class Controller {
 
     }
 
-    class Builder {
+    public class Builder {
 
         private Builder() {
 
@@ -68,7 +69,9 @@ public class Controller {
     }
 
 
-    public void modulateWork(final Analytics analytics) {
+    public Analytics modulateWork() {
+        final Analytics analytics = new Analytics(amountOfSources, amountOfDevices);
+
         final Buffer buffer = new Buffer(bufferSize);
         final ProductionManager productionManager = new ProductionManager(amountOfSources, alpha, beta);
         final SelectionManager selectionManager = new SelectionManager(amountOfDevices);
@@ -103,7 +106,9 @@ public class Controller {
         }
 
         analytics.calcTimeInSystem();
+        analytics.setFullTimeOfWork(currentTime);
         analytics.printStat();
+        return analytics;
     }
 
     private void processDoneRequest(final List<DoneInfo> doneRequestsWithDevices,
@@ -116,7 +121,7 @@ public class Controller {
             if (doneRequest != null) {
                 logger.info("Прибор №{} освободился в {}, выполнив {} запрос источника №{}",
                         doneInfo.deviceNumber, doneInfo.doneTime, doneRequest.getNumber(), doneRequest.getSourceNumber());
-                analytics.addDoneRequest(doneInfo.deviceNumber, doneRequest, doneInfo.doneTime, doneInfo.doneTime);
+                analytics.addDoneRequest(doneInfo.deviceNumber, doneRequest, doneInfo.doneTime, doneInfo.timeOfWork);
             }
             if (!buffer.isEmpty()) {
                 final int packageNumber = selectionManager.getPackageNumber();
