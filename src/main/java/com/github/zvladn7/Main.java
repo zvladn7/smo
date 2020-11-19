@@ -6,12 +6,13 @@ public class Main {
         Controller controller = Controller.newBuilder()
                 .setAlpha(1)
                 .setBeta(3)
-                .setAmountOfDevices(4)
+                .setLamda(1)
+                .setAmountOfDevices(10)
                 .setAmountOfSources(4)
                 .setBufferSize(10)
                 .setRequestsNumber(1000)
                 .build();
 
-        controller.modulateWork();
+        controller.autoMode();
     }
 }

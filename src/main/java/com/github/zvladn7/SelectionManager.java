@@ -21,16 +21,16 @@ public class SelectionManager {
      */
     private int circleIndex;
 
-    public SelectionManager(final int amountOfDevices) {
+    public SelectionManager(final int amountOfDevices, final double lamda) {
         this.devices = new Device[amountOfDevices];
         this.circleIndex = 0;
         this.packageNumber = UNSET_PACKAGE_NUMBER_VALUE;
-        initDevices();
+        initDevices(lamda);
     }
 
-    private void initDevices() {
+    private void initDevices(final double lamda) {
         for (int i = 0; i < devices.length; ++i) {
-            devices[i] = new Device(i);
+            devices[i] = new Device(i, lamda);
         }
     }
 

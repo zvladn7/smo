@@ -1,11 +1,9 @@
 package com.github.zvladn7.graphics.controllers;
 
-import com.github.zvladn7.Controller;
 import com.github.zvladn7.analytics.Analytics;
 import com.github.zvladn7.analytics.DeviceResults;
 import com.github.zvladn7.analytics.SourceResults;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
 import java.util.List;

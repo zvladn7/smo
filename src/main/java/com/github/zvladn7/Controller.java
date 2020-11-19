@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.TreeMap;
 
 public class Controller {
 
@@ -14,12 +15,41 @@ public class Controller {
     private double alpha;
     private double beta;
     private int amountOfSources;
+    private double lamda;
     private int amountOfDevices;
     private int bufferSize;
     private int requestsNumber;
 
     private Controller() {
 
+    }
+
+    public double getAlpha() {
+        return alpha;
+    }
+
+    public double getBeta() {
+        return beta;
+    }
+
+    public int getAmountOfSources() {
+        return amountOfSources;
+    }
+
+    public double getLamda() {
+        return lamda;
+    }
+
+    public int getAmountOfDevices() {
+        return amountOfDevices;
+    }
+
+    public int getBufferSize() {
+        return bufferSize;
+    }
+
+    public int getRequestsNumber() {
+        return requestsNumber;
     }
 
     public class Builder {
@@ -40,6 +70,11 @@ public class Controller {
 
         public Builder setAmountOfSources(final int amount) {
             Controller.this.amountOfSources = amount;
+            return this;
+        }
+
+        public Builder setLamda(final double lamda) {
+            Controller.this.lamda = lamda;
             return this;
         }
 
@@ -69,22 +104,32 @@ public class Controller {
     }
 
 
+    public void autoMode() {
+        final Analytics analytics = modulateWork();
+        analytics.printStat();
+    }
+
+    public void stepMode() {
+        final Analytics analytics = modulateWork();
+        final TreeMap<Double, Pair<Analytics.EventType, Integer>> analyticsByStep = analytics.getAnalyticsByStep();
+    }
+
     public Analytics modulateWork() {
         final Analytics analytics = new Analytics(amountOfSources, amountOfDevices);
 
         final Buffer buffer = new Buffer(bufferSize);
         final ProductionManager productionManager = new ProductionManager(amountOfSources, alpha, beta);
-        final SelectionManager selectionManager = new SelectionManager(amountOfDevices);
+        final SelectionManager selectionManager = new SelectionManager(amountOfDevices, lamda);
 
         double currentTime = 0;
 
         for (int i = 0; i < requestsNumber; ++i) {
+            List<DoneInfo> doneRequestsWithDevices = selectionManager.getDoneRequestsWithDevices(currentTime);
+            processDoneRequest(doneRequestsWithDevices, selectionManager, buffer, currentTime, analytics);
+
             final Pair<Double, List<Request>> nextRequestPair = productionManager.getNextRequest(currentTime);
             final List<Request> nextRequests = nextRequestPair.value;
             currentTime += nextRequestPair.key;
-
-            List<DoneInfo> doneRequestsWithDevices = selectionManager.getDoneRequestsWithDevices(currentTime);
-            processDoneRequest(doneRequestsWithDevices, selectionManager, buffer, currentTime, analytics);
 
             for (final Request nextRequest : nextRequests){
                 logger.info("Источник №{} создал заявку №{} в {}",
@@ -105,9 +150,8 @@ public class Controller {
             }
         }
 
-        analytics.calcTimeInSystem();
         analytics.setFullTimeOfWork(currentTime);
-        analytics.printStat();
+        analytics.calcTimeInSystem();
         return analytics;
     }
 
@@ -137,8 +181,15 @@ public class Controller {
                     selectionManager.setPackageNumber(requestFromBufPair.value.getSourceNumber());
                 }
                 final Request requestFromBuf = requestFromBufPair.value;
-                analytics.removeFromBuffer(requestFromBuf, requestFromBufPair.key, doneInfo.doneTime);
-
+//                requestFromBuf.getInitialTime() < doneInfo.doneTime
+                logger.info("DoneTime={}", doneInfo.doneTime);
+                logger.info("RequestFromBuf init time={}", requestFromBuf.getInitialTime());
+                logger.info("Current time={}", currentTime);
+                if (doneInfo.doneTime == -1.0) {
+                    analytics.removeFromBuffer(requestFromBuf, requestFromBufPair.key, currentTime);
+                } else {
+                    analytics.removeFromBuffer(requestFromBuf, requestFromBufPair.key, doneInfo.doneTime);
+                }
                 final int deviceNumber = selectionManager.executeRequest(requestFromBuf, currentTime);
                 logger.info("Заявка №{} от источника №{} загружена на прибор №{}",
                         requestFromBuf.getNumber(), requestFromBuf.getSourceNumber(), deviceNumber);
