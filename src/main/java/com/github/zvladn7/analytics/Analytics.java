@@ -12,6 +12,7 @@ import java.util.TreeMap;
 
 public class Analytics {
 
+
     private static final Logger logger = LoggerFactory.getLogger(Analytics.class);
 
     //1 - количество сгенирированных заявок каждым источником
@@ -34,9 +35,9 @@ public class Analytics {
      * Map field that representing analytics of process.
      * Where:
      * Key: Double is a time of moment when the event was happened
-     * Value: Pair of event type and number of (sources, buf position or device) depend on type
+     * Value: Pair of event type and pair number of (sources, buf position or device) depend on type and source
      */
-    private TreeMap<Double, Pair<EventType, Integer>> analyticsByStep;
+    private TreeMap<Pair<Double, Pair<EventType, Integer>>, Integer> analyticsByStep;
     private double fullTimeOfWork;
 
     /**
@@ -46,9 +47,9 @@ public class Analytics {
         GENERATED_REQUEST,
         CANCELED_REQUEST,
         PUT_TO_BUFFER,
+        FREE_DEVICE,
         REMOVE_FROM_BUFFER,
-        PUT_ON_DEVICE,
-        FREE_DEVICE
+        PUT_ON_DEVICE
     }
 
     //for sources
@@ -63,7 +64,23 @@ public class Analytics {
     private double[] deviceWorkTime;
 
     public Analytics(final int sourcesAmount, final int devicesAmount) {
-        analyticsByStep = new TreeMap<>();
+        analyticsByStep = new TreeMap<>((first, second) -> {
+            int compare = first.getKey().compareTo(second.getKey());
+            if (compare > 0) {
+                return 1;
+            } else if (compare == 0) {
+                Pair<EventType, Integer> firstValue = first.getValue();
+                Pair<EventType, Integer> secondValue = second.getValue();
+                compare = firstValue.getKey().compareTo(secondValue.getKey());
+                if (compare == 0) {
+                    return firstValue.getValue().compareTo(secondValue.getValue());
+                } else {
+                    return compare;
+                }
+            } else {
+                return -1;
+            }
+        });
         statArraysInit(sourcesAmount, devicesAmount);
     }
 
@@ -83,21 +100,29 @@ public class Analytics {
     public void addGeneratedRequest(final Request request) {
         final int sourceNumber = request.getSourceNumber();
         amountOfGeneratedRequests[sourceNumber]++;
-        analyticsByStep.put(request.getInitialTime(), new Pair<>(EventType.GENERATED_REQUEST, sourceNumber));
+        analyticsByStep.put(
+                new Pair<>(request.getInitialTime(), new Pair<>(EventType.GENERATED_REQUEST, sourceNumber)),
+                sourceNumber);
     }
 
-    public void cancelRequest(final Request request, final double currentTime) {
+    public void cancelRequest(final Request request, final Request nextRequest, final int bufferPos) {
         final int sourceNumber = request.getSourceNumber();
         final double initialTime = request.getInitialTime();
         amountOfFailed[sourceNumber]++;
-        timeOfWait[sourceNumber] += currentTime - initialTime;
-        logger.info("Время ожидания выбитой заявки: {}", (currentTime - initialTime));
-        analyticsByStep.put(initialTime, new Pair<>(EventType.CANCELED_REQUEST, sourceNumber));
+        timeOfWait[sourceNumber] += nextRequest.getInitialTime() - initialTime;
+        logger.info("Время ожидания выбитой заявки: {}", (nextRequest.getInitialTime() - initialTime));
+        if (bufferPos != -1) {
+            analyticsByStep.put(
+                    new Pair<>(initialTime, new Pair<>(EventType.CANCELED_REQUEST, nextRequest.getSourceNumber())),
+                    bufferPos);
+        }
     }
 
     public void addRequestToBuffer(final Request nextRequest,
                                    final Integer bufferPosition) {
-        analyticsByStep.put(nextRequest.getInitialTime(), new Pair<>(EventType.PUT_TO_BUFFER, bufferPosition));
+        analyticsByStep.put(
+                new Pair<>(nextRequest.getInitialTime(), new Pair<>(EventType.PUT_TO_BUFFER, nextRequest.getSourceNumber())),
+                bufferPosition);
     }
 
     public void removeFromBuffer(final Request request,
@@ -106,12 +131,17 @@ public class Analytics {
         final int sourceNumber = request.getSourceNumber();
         timeOfWait[sourceNumber] += time - request.getInitialTime();
         logger.info("Время ожидания заявки в буфере: {}", (time - request.getInitialTime()));
-        analyticsByStep.put(time, new Pair<>(EventType.REMOVE_FROM_BUFFER, bufferPosition));
+        analyticsByStep.put(
+                new Pair<>(time, new Pair<>(EventType.REMOVE_FROM_BUFFER, request.getSourceNumber())),
+                bufferPosition);
     }
 
     public void putOnDevice(final int deviceNumber,
-                            final double time) {
-        analyticsByStep.put(time, new Pair<>(EventType.PUT_ON_DEVICE, deviceNumber));
+                            final double time,
+                            final int sourceNumber) {
+        analyticsByStep.put(
+                new Pair<>(time, new Pair<>(EventType.PUT_ON_DEVICE, sourceNumber)),
+                deviceNumber);
     }
 
     public void addDoneRequest(final int deviceNumber,
@@ -122,7 +152,9 @@ public class Analytics {
         this.timeOnDevice[sourceNumber] += timeOnDevice;
         this.deviceWorkTime[deviceNumber] += timeOfWork;
         this.amountOfProcessed[sourceNumber]++;
-        this.analyticsByStep.put(timeOnDevice, new Pair<>(EventType.FREE_DEVICE, deviceNumber));
+        this.analyticsByStep.put(
+                new Pair<>(timeOnDevice, new Pair<>(EventType.FREE_DEVICE, request.getSourceNumber())),
+                deviceNumber);
     }
 
     public void calcTimeInSystem() {
@@ -131,7 +163,7 @@ public class Analytics {
         }
     }
 
-    public TreeMap<Double, Pair<EventType, Integer>> getAnalyticsByStep() {
+    public TreeMap<Pair<Double, Pair<EventType, Integer>>, Integer> getAnalyticsByStep() {
         return analyticsByStep;
     }
 
