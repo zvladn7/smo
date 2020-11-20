@@ -129,7 +129,7 @@ public class Controller {
             currentTime += nextRequestPair.key;
 
             for (final Request nextRequest : nextRequests) {
-                logger.info("Источник №{} создал заявку №{} в {}",
+                logger.info("Uсточник №{} создал заявку №{} в {}",
                         nextRequest.getSourceNumber(), nextRequest.getNumber(), nextRequest.getInitialTime());
                 logger.info("CurrentTime: {}", currentTime);
                 analytics.addGeneratedRequest(nextRequest);

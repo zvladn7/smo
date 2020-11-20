@@ -44,7 +44,7 @@ public final class StepModeController {
             final int sourceNum = entry.getKey().value.value;
             switch (eventType) {
                 case GENERATED_REQUEST:
-                    logger.info("Источник {} сгенерировал новую заявку", sourceNum);
+                    logger.info("Uсточник {} сгенерировал новую заявку", sourceNum);
                     break;
                 case CANCELED_REQUEST:
                     logger.info("Заявка источника {} отменена, индекс буфера {}", sourceNum, value);
@@ -78,6 +78,7 @@ public final class StepModeController {
                 what = scanner.nextLine();
             }
         }
+        analytics.printStat();
     }
 
     private void putOnDevice(final int[] deviceIsBusy,
@@ -108,10 +109,10 @@ public final class StepModeController {
     private void printCurrentStepModeSituation(final int[] bufIsBusy,
                                                final int[] deviceIsBusy) {
         for (int i = 0; i < bufIsBusy.length; ++i) {
-            logger.info("Буфер, позиция={} : источник={}", i, bufIsBusy[i]);
+            logger.info("Буфер, позиция={} : источник={}", i, bufIsBusy[i] == -1 ? "null" : bufIsBusy[i]);
         }
         for (int i = 0; i < deviceIsBusy.length; ++i) {
-            logger.info("Прибор, номер={} : источник={}", i, deviceIsBusy[i]);
+            logger.info("Прибор, номер={} : источник={}", i, deviceIsBusy[i] == -1 ? "null" : deviceIsBusy[i]);
         }
     }
 

@@ -17,7 +17,7 @@ public class SetSettingsWindowController {
     static Controller controller = Controller.newBuilder()
             .setAlpha(1)
             .setBeta(3)
-            .setLamda(1.2)
+            .setLamda(1.25)
             .setAmountOfDevices(4)
             .setAmountOfSources(4)
             .setBufferSize(10)
@@ -83,8 +83,8 @@ public class SetSettingsWindowController {
             logger.error("Невозможно установить параметры", ex);
         }
 
-        showAlert("Усатновка параметров",
-                "Параметры успешно установлены!",
+        showAlert("Parameters setting",
+                "Parameters were successfully set",
                 Alert.AlertType.INFORMATION);
         Stage stage = (Stage) setBtn.getScene().getWindow();
         stage.close();
@@ -94,8 +94,8 @@ public class SetSettingsWindowController {
         try {
             return Integer.parseInt(num);
         } catch (NumberFormatException ex) {
-            showAlert("Невозможно преобразование",
-                    "Неверный формат ввода.\nВсе параметры - целые числа",
+            showAlert("Cannot transform to number",
+                    "Incorrect format of input",
                     Alert.AlertType.ERROR);
             throw new IllegalArgumentException(ex);
         }
@@ -105,8 +105,8 @@ public class SetSettingsWindowController {
         try {
             return Double.parseDouble(num);
         } catch (NumberFormatException ex) {
-            showAlert("Невозможно преобразование",
-                    "Неверный формат ввода.\nВсе параметры - целые числа",
+            showAlert("Cannot transform to number",
+                    "Incorrect format of input",
                     Alert.AlertType.ERROR);
             throw new IllegalArgumentException(ex);
         }

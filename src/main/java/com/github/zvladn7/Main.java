@@ -16,8 +16,8 @@ public class Main {
                 .setRequestsNumber(1000)
                 .build();
 
-        controller.autoMode();
-//        StepModeController stepModeController = new StepModeController(controller);
-//        stepModeController.stepMode();
+//        controller.autoMode();
+        StepModeController stepModeController = new StepModeController(controller);
+        stepModeController.stepMode();
     }
 }
