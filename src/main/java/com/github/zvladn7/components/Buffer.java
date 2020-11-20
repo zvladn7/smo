@@ -1,5 +1,6 @@
-package com.github.zvladn7;
+package com.github.zvladn7.components;
 
+import com.github.zvladn7.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,17 @@ public class Buffer {
     }
 
     public Pair<Integer, Request> getPriorityRequest() {
-        return new Pair<>(0, requests.poll());
+        int theMostPriorSource = Integer.MAX_VALUE;
+        Request prior = null;
+        for (final Request request : requests) {
+            if (request.getSourceNumber() < theMostPriorSource) {
+               prior = request;
+               theMostPriorSource = request.getSourceNumber();
+            }
+        }
+        final int index = requests.indexOf(prior);
+        requests.remove(prior);
+        return new Pair<>(index, prior);
     }
 
     /**

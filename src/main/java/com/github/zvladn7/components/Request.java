@@ -1,4 +1,4 @@
-package com.github.zvladn7;
+package com.github.zvladn7.components;
 
 import java.util.Comparator;
 

@@ -1,6 +1,6 @@
 package com.github.zvladn7.graphics.controllers;
 
-import com.github.zvladn7.Controller;
+import com.github.zvladn7.controllers.Controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -14,10 +14,10 @@ public class SetSettingsWindowController {
 
     private static final Logger logger = LoggerFactory.getLogger(SetSettingsWindowController.class);
 
-    public static Controller controller = Controller.newBuilder()
+    static Controller controller = Controller.newBuilder()
             .setAlpha(1)
             .setBeta(3)
-            .setLamda(1)
+            .setLamda(1.2)
             .setAmountOfDevices(4)
             .setAmountOfSources(4)
             .setBufferSize(10)

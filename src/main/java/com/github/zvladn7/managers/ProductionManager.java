@@ -1,4 +1,8 @@
-package com.github.zvladn7;
+package com.github.zvladn7.managers;
+
+import com.github.zvladn7.util.Pair;
+import com.github.zvladn7.components.Request;
+import com.github.zvladn7.components.Source;
 
 import java.util.ArrayList;
 import java.util.Comparator;

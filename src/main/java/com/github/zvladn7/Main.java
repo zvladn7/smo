@@ -1,5 +1,8 @@
 package com.github.zvladn7;
 
+import com.github.zvladn7.controllers.Controller;
+import com.github.zvladn7.controllers.StepModeController;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -13,7 +16,8 @@ public class Main {
                 .setRequestsNumber(1000)
                 .build();
 
-//        controller.autoMode();
-        controller.stepMode();
+        controller.autoMode();
+//        StepModeController stepModeController = new StepModeController(controller);
+//        stepModeController.stepMode();
     }
 }

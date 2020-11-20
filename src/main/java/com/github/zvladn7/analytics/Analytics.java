@@ -1,7 +1,7 @@
 package com.github.zvladn7.analytics;
 
-import com.github.zvladn7.Pair;
-import com.github.zvladn7.Request;
+import com.github.zvladn7.util.Pair;
+import com.github.zvladn7.components.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,15 +65,15 @@ public class Analytics {
 
     public Analytics(final int sourcesAmount, final int devicesAmount) {
         analyticsByStep = new TreeMap<>((first, second) -> {
-            int compare = first.getKey().compareTo(second.getKey());
+            int compare = first.key.compareTo(second.key);
             if (compare > 0) {
                 return 1;
             } else if (compare == 0) {
-                Pair<EventType, Integer> firstValue = first.getValue();
-                Pair<EventType, Integer> secondValue = second.getValue();
-                compare = firstValue.getKey().compareTo(secondValue.getKey());
+                Pair<EventType, Integer> firstValue = first.value;
+                Pair<EventType, Integer> secondValue = second.value;
+                compare = firstValue.key.compareTo(secondValue.key);
                 if (compare == 0) {
-                    return firstValue.getValue().compareTo(secondValue.getValue());
+                    return firstValue.value.compareTo(secondValue.value);
                 } else {
                     return compare;
                 }

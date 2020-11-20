@@ -1,4 +1,4 @@
-package com.github.zvladn7;
+package com.github.zvladn7.components;
 
 import java.util.Random;
 
@@ -42,7 +42,6 @@ public class Device {
     public void clearAfterDoneProcessing() {
         this.requestOnDevice = null;
         this.startTime = -1;
-        this.timeToDone = -1;
     }
 
     public Request getDoneRequest() {

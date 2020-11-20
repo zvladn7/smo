@@ -1,4 +1,7 @@
-package com.github.zvladn7;
+package com.github.zvladn7.managers;
+
+import com.github.zvladn7.components.Device;
+import com.github.zvladn7.components.Request;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,7 +91,7 @@ public class SelectionManager {
         return doneList;
     }
 
-    class DoneInfo {
+    public class DoneInfo {
         public int deviceNumber;
         public Request doneRequest;
         public double doneTime;
