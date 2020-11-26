@@ -55,19 +55,19 @@ public class SelectionManager {
         return false;
     }
 
-    public int executeRequest(final Request request, final double currentTime) {
-        final int freeDeviceIndex = getFreeDeviceIndex();
-        devices[freeDeviceIndex].execute(request, currentTime);
+    public int executeRequest(final Request request, final double time) {
+        final int freeDeviceIndex = getFreeDeviceIndex(time);
+        devices[freeDeviceIndex].execute(request, time);
         return freeDeviceIndex;
     }
 
-    private int getFreeDeviceIndex() {
+    private int getFreeDeviceIndex(final double time) {
         int deviceIndex = circleIndex;
         do {
             if (deviceIndex >= devices.length) {
                 deviceIndex = 0;
             }
-            if (devices[deviceIndex].isFree()) {
+            if (devices[deviceIndex].isFree() && (devices[deviceIndex].getDoneTime() <= time + 0.0000001)) {
                 circleIndex = deviceIndex + 1;
                 return deviceIndex;
             }
@@ -105,6 +105,10 @@ public class SelectionManager {
             this.doneRequest = doneRequest;
             this.doneTime = doneTime;
             this.timeOfWork = timeOfWork;
+        }
+
+        public double getDoneTime() {
+            return doneTime;
         }
     }
 

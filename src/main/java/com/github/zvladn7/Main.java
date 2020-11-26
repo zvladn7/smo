@@ -13,7 +13,7 @@ public class Main {
                 .setAmountOfDevices(4)
                 .setAmountOfSources(4)
                 .setBufferSize(5)
-                .setRequestsNumber(1000)
+                .setRequestsNumber(800)
                 .build();
 
 //        controller.autoMode();

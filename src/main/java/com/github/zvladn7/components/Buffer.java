@@ -4,6 +4,7 @@ import com.github.zvladn7.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class Buffer {
@@ -12,6 +13,7 @@ public class Buffer {
 
     final private LinkedList<Request> requests;
     final private int capacity;
+    private int packageAmount = 0;
 
     public Buffer(final int capacity) {
         this.capacity = capacity;
@@ -35,8 +37,16 @@ public class Buffer {
                theMostPriorSource = request.getSourceNumber();
             }
         }
+        assert prior != null;
         final int index = requests.indexOf(prior);
         requests.remove(prior);
+        for (final Request request : requests) {
+            if (request.getSourceNumber() == prior.getSourceNumber()) {
+                packageAmount++;
+            }
+        }
+        logger.info("Amount of requests in package: {}, package = {}", packageAmount, prior.getSourceNumber());
+        print();
         return new Pair<>(index, prior);
     }
 
@@ -46,11 +56,17 @@ public class Buffer {
      * @return request from the package or null
      */
     public Pair<Integer, Request> getPackageRequest(final int packageNumber) {
+        if (packageAmount == 0) {
+            return null;
+        }
         for (final Request request : requests) {
             if (request.getSourceNumber() == packageNumber) {
                 logger.info("Следующий запрос из пакета №{} : {}", request.getSourceNumber(), request.getNumber());
                 final int index = requests.indexOf(request);
                 requests.remove(request);
+                packageAmount--;
+                logger.info("Amount of requests in package: {}, package = {}", packageAmount, request.getSourceNumber());
+                print();
                 return new Pair<>(index, request);
             }
         }
@@ -87,26 +103,13 @@ public class Buffer {
         return requests.isEmpty();
     }
 
-    public static void main(String[] args) {
-        Buffer buffer = new Buffer(5);
-        buffer.put(new Request(1,1,1));
-        buffer.put(new Request(1, 2, 2));
-        buffer.put(new Request(2, 1, 1));
-        buffer.put(new Request(2, 2, 2));
-        buffer.put(new Request(2, 3, 3));
-//        buffer.put(new Request(1, 3, 3));
-//        buffer.put(new Request(1, 4, 4));
-//        buffer.put(new Request(1, 5, 5));
-        System.out.println(buffer.isFull());
-//        System.out.println(buffer.getPackageRequest(2));
-//        System.out.println(buffer.getPackageRequest(2));
-//        System.out.println(buffer.getPackageRequest(2));
-        System.out.println(buffer.getLessPriority(new Request(3, 1, 1)).key);
-        System.out.println(buffer.getLessPriority(new Request(3, 2, 1)).key);
-        System.out.println(buffer.getLessPriority(new Request(3, 3, 1)).key);
-        System.out.println(buffer.getLessPriority(new Request(1, 3, 1)).key);
-        System.out.println(buffer.getLessPriority(new Request(1, 3, 1)).key);
-        System.out.println(buffer.getLessPriority(new Request(1, 3, 1)).key);
+    private void print() {
+        StringBuilder buf = new StringBuilder("[");
+        for (final Request request : requests) {
+            buf.append(request.getSourceNumber()).append(" ");
+        }
+        buf.append("]");
+        logger.info("Buffer: {}", buf);
     }
 
 }

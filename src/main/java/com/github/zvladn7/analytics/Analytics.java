@@ -37,7 +37,7 @@ public class Analytics {
      * Key: Double is a time of moment when the event was happened
      * Value: Pair of event type and pair number of (sources, buf position or device) depend on type and source
      */
-    private TreeMap<Pair<Double, Pair<EventType, Integer>>, Integer> analyticsByStep;
+    private TreeMap<Pair<Double, Pair<EventType, Integer>>, Pair<Integer, Integer>> analyticsByStep;
     private double fullTimeOfWork;
 
     /**
@@ -102,7 +102,7 @@ public class Analytics {
         amountOfGeneratedRequests[sourceNumber]++;
         analyticsByStep.put(
                 new Pair<>(request.getInitialTime(), new Pair<>(EventType.GENERATED_REQUEST, sourceNumber)),
-                sourceNumber);
+                new Pair<>(sourceNumber, null));
     }
 
     public void cancelRequest(final Request request, final Request nextRequest, final int bufferPos) {
@@ -113,8 +113,9 @@ public class Analytics {
         logger.info("Время ожидания выбитой заявки: {}", (nextRequest.getInitialTime() - initialTime));
         if (bufferPos != -1) {
             analyticsByStep.put(
-                    new Pair<>(initialTime, new Pair<>(EventType.CANCELED_REQUEST, nextRequest.getSourceNumber())),
-                    bufferPos);
+                    new Pair<>(nextRequest.getInitialTime(), new Pair<>(EventType.CANCELED_REQUEST, request.getSourceNumber())),
+                    new Pair<>(bufferPos, null));
+            addRequestToBuffer(nextRequest, -1);
         }
     }
 
@@ -122,18 +123,19 @@ public class Analytics {
                                    final Integer bufferPosition) {
         analyticsByStep.put(
                 new Pair<>(nextRequest.getInitialTime(), new Pair<>(EventType.PUT_TO_BUFFER, nextRequest.getSourceNumber())),
-                bufferPosition);
+                new Pair<>(bufferPosition, null));
     }
 
     public void removeFromBuffer(final Request request,
                                  final Integer bufferPosition,
-                                 final double time) {
+                                 final double time,
+                                 final int packageNum) {
         final int sourceNumber = request.getSourceNumber();
         timeOfWait[sourceNumber] += time - request.getInitialTime();
         logger.info("Время ожидания заявки в буфере: {}", (time - request.getInitialTime()));
         analyticsByStep.put(
                 new Pair<>(time, new Pair<>(EventType.REMOVE_FROM_BUFFER, request.getSourceNumber())),
-                bufferPosition);
+                new Pair<>(bufferPosition, packageNum));
     }
 
     public void putOnDevice(final int deviceNumber,
@@ -141,7 +143,7 @@ public class Analytics {
                             final int sourceNumber) {
         analyticsByStep.put(
                 new Pair<>(time, new Pair<>(EventType.PUT_ON_DEVICE, sourceNumber)),
-                deviceNumber);
+                new Pair<>(deviceNumber, null));
     }
 
     public void addDoneRequest(final int deviceNumber,
@@ -154,7 +156,7 @@ public class Analytics {
         this.amountOfProcessed[sourceNumber]++;
         this.analyticsByStep.put(
                 new Pair<>(timeOnDevice, new Pair<>(EventType.FREE_DEVICE, request.getSourceNumber())),
-                deviceNumber);
+                new Pair<>(deviceNumber, null));
     }
 
     public void calcTimeInSystem() {
@@ -163,7 +165,7 @@ public class Analytics {
         }
     }
 
-    public TreeMap<Pair<Double, Pair<EventType, Integer>>, Integer> getAnalyticsByStep() {
+    public TreeMap<Pair<Double, Pair<EventType, Integer>>, Pair<Integer, Integer>> getAnalyticsByStep() {
         return analyticsByStep;
     }
 

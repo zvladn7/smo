@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.github.zvladn7.util.Pair;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class Controller {
@@ -160,6 +161,8 @@ public class Controller {
                                     final Buffer buffer,
                                     final double currentTime,
                                     final Analytics analytics) {
+        logger.info("------------Приборы--------------");
+        doneRequestsWithDevices.sort(Comparator.comparing(DoneInfo::getDoneTime));
         for (final DoneInfo doneInfo : doneRequestsWithDevices) {
             final Request doneRequest = doneInfo.doneRequest;
             if (doneRequest != null) {
@@ -168,32 +171,35 @@ public class Controller {
                 analytics.addDoneRequest(doneInfo.deviceNumber, doneRequest, doneInfo.doneTime, doneInfo.timeOfWork);
             }
             if (!buffer.isEmpty()) {
-                final int packageNumber = selectionManager.getPackageNumber();
+                int packageNumber = selectionManager.getPackageNumber();
                 Pair<Integer, Request> requestFromBufPair;
                 if (packageNumber != -1) {
                     requestFromBufPair = buffer.getPackageRequest(packageNumber);
                     if (requestFromBufPair == null) {
                         requestFromBufPair = buffer.getPriorityRequest();
-                        selectionManager.setPackageNumber(requestFromBufPair.value.getSourceNumber());
+                        packageNumber = requestFromBufPair.value.getSourceNumber();
+                        selectionManager.setPackageNumber(packageNumber);
                     }
                 } else {
                     requestFromBufPair = buffer.getPriorityRequest();
-                    selectionManager.setPackageNumber(requestFromBufPair.value.getSourceNumber());
+                    packageNumber = requestFromBufPair.value.getSourceNumber();
+                    selectionManager.setPackageNumber(packageNumber);
                 }
+                logger.info("Package buffer number: {}", packageNumber);
                 final Request requestFromBuf = requestFromBufPair.value;
                 logger.info("DoneTime={}", doneInfo.doneTime);
                 logger.info("RequestFromBuf init time={}", requestFromBuf.getInitialTime());
                 logger.info("Current time={}", currentTime);
                 double time;
                 if (doneInfo.doneTime == -1.0) {
-                    analytics.removeFromBuffer(requestFromBuf, requestFromBufPair.key, currentTime);
+                    analytics.removeFromBuffer(requestFromBuf, requestFromBufPair.key, currentTime, packageNumber);
                     time = currentTime;
                 } else {
                     if (requestFromBuf.getInitialTime() > doneInfo.doneTime) {
-                        analytics.removeFromBuffer(requestFromBuf, requestFromBufPair.key, requestFromBuf.getInitialTime());
+                        analytics.removeFromBuffer(requestFromBuf, requestFromBufPair.key, requestFromBuf.getInitialTime(), packageNumber);
                         time = requestFromBuf.getInitialTime();
                     } else {
-                        analytics.removeFromBuffer(requestFromBuf, requestFromBufPair.key, doneInfo.doneTime);
+                        analytics.removeFromBuffer(requestFromBuf, requestFromBufPair.key, doneInfo.doneTime, packageNumber);
                         time = doneInfo.doneTime;
                     }
                 }
