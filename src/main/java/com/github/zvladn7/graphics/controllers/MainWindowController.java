@@ -22,9 +22,6 @@ public class MainWindowController {
     private Button autoModeBtn;
 
     @FXML
-    private Button stepModeBtn;
-
-    @FXML
     private Button setSettingsBtn;
 
     @FXML
@@ -34,7 +31,6 @@ public class MainWindowController {
     @FXML
     void initialize() {
         setOnActionForButton(autoModeBtn, getPathByFileName("AutoModeWindow.fxml"));
-        setOnActionForButton(stepModeBtn, getPathByFileName("StepModeWindow.fxml"));
         setOnActionForButton(setSettingsBtn, getPathByFileName("SetSettingWindow.fxml"));
     }
 

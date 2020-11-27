@@ -88,7 +88,6 @@ public class Buffer {
             return new Pair<>(-1, newRequest);
         } else {
             final int i = requests.indexOf(lessPriority);
-//            requests.set(i, newRequest);
             requests.remove(lessPriority);
             requests.add(newRequest);
             return new Pair<>(i, lessPriority);

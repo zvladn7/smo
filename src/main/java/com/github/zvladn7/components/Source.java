@@ -28,11 +28,4 @@ public class Source {
         return generator.nextDouble()  * (beta - alpha) + alpha;
     }
 
-//    public static void main(String[] args) {
-//        Source source = new Source(1, 2, 3);
-//        for (int i = 0; i < 10; i++) {
-//            System.out.println(source.getNextRequestTime(i));
-//        }
-//
-//    }
 }

@@ -30,12 +30,11 @@ public class Analytics {
     7 - коэфициент использования устройств (время работы каждого прибора / время реализации)
      */
 
-
     /**
      * Map field that representing analytics of process.
      * Where:
-     * Key: Double is a time of moment when the event was happened
-     * Value: Pair of event type and pair number of (sources, buf position or device) depend on type and source
+     * Key: Pair: key - time, value - pair where key - type of event, value - request's source number
+     * Value: Pair - key - component number, value - additional info
      */
     private TreeMap<Pair<Double, Pair<EventType, Integer>>, Pair<Integer, Integer>> analyticsByStep;
     private double fullTimeOfWork;
@@ -250,15 +249,15 @@ public class Analytics {
     }
 
     private void printArray(final int[] arr) {
-        for (int i = 0; i < arr.length; i++) {
-            System.out.print(arr[i] + " ");
+        for (int value : arr) {
+            System.out.print(value + " ");
         }
         System.out.println();
     }
 
     private void printArray(final double[] arr) {
-        for (int i = 0; i < arr.length; i++) {
-            System.out.printf("%.3f ", arr[i]);
+        for (double v : arr) {
+            System.out.printf("%.3f ", v);
         }
         System.out.println();
     }

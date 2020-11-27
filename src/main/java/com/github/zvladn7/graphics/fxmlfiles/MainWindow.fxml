@@ -17,8 +17,7 @@
          </children>
       </AnchorPane>
       <Button fx:id="autoModeBtn" alignment="CENTER" layoutX="397.0" layoutY="333.0" mnemonicParsing="false" prefHeight="69.0" prefWidth="407.0" style="-fx-background-color: #2E3348;" text="Автоматический режим" textFill="WHITE" />
-      <Button fx:id="stepModeBtn" alignment="CENTER" layoutX="397.0" layoutY="415.0" mnemonicParsing="false" prefHeight="69.0" prefWidth="407.0" style="-fx-background-color: #2E3348;" text="Пошаговый режим" textFill="WHITE" />
-      <Button fx:id="setSettingsBtn" alignment="CENTER" layoutX="397.0" layoutY="499.0" mnemonicParsing="false" prefHeight="69.0" prefWidth="407.0" style="-fx-background-color: #2E3348;" text="Установка параметров" textFill="WHITE" />
+      <Button fx:id="setSettingsBtn" alignment="CENTER" layoutX="397.0" layoutY="415.0" mnemonicParsing="false" prefHeight="69.0" prefWidth="407.0" style="-fx-background-color: #2E3348;" text="Установка параметров" textFill="WHITE" />
       <Button fx:id="exitBtn" alignment="CENTER" layoutX="397.0" layoutY="583.0" mnemonicParsing="false" onAction="#exitClick" prefHeight="69.0" prefWidth="407.0" style="-fx-background-color: #2E3348;" text="Выход" textFill="WHITE" />
    </children>
 </AnchorPane>
